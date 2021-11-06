@@ -1,0 +1,22 @@
+ul {
+  list-style-type: none;
+  padding: 0;
+  width: 30%;
+  margin: auto;
+}
+
+li {
+  border-bottom: 1px dotted rebeccapurple;
+}
+
+li span {
+  float: right;
+  color: red;
+  background-color: rosybrown;
+  width: 20px;
+  height: 20px;
+}
+
+li span:hover {
+  cursor: pointer;
+}
