@@ -1,5 +1,12 @@
 const express = require('express')
 const {v4: uuidv4} = require('uuid')
+const mongoose = require('mongoose')
+const MemberSchema = require('./models/member')
+
+mongoose.connect('mongodb://localhost:27017/test')
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'))
+const Member = mongoose.model('Member', MemberSchema)
 
 let MEMBERS = [
 	{id: '1', name: 'Joe', email: 'joe@gmail.com'},
@@ -16,7 +23,10 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/members', (req, res) => {
-	res.json(MEMBERS)
+	Member.find().exec((err, members) => {
+		if (err) return res.status(500)
+		return res.status(201).json(members)
+	})
 })
 
 
@@ -24,25 +34,31 @@ app.post('/api/member', (req, res) => {
 	if (!req.body.name || !req.body.email) {
 		return res.status(400).json({msg: 'Name and Email are required.'})
 	} else {
-		const newMember = {
+		Member.create({
 			id: uuidv4(),
 			name: req.body.name,
 			email: req.body.email
-		}
-
-		MEMBERS.push(newMember)
-		return res.status(201).json(MEMBERS)
+		}).then(() => {
+			Member.find().exec((err, members) => {
+				if (err) return res.status(500)
+				return res.status(201).json(members)
+			})
+		})		
 	}
 })
 
 app.del('/api/member/:id', (req, res) => {
-	if (MEMBERS.some(member => member.id === req.params.id)) {
-		MEMBERS = MEMBERS.filter(member => member.id !== req.params.id)
-
-		return res.json(MEMBERS)
-	} else {
-		res.status(400).json({msg: 'There is no member with that id.'})
-	}
+	Member.find({id: req.params.id}).exec((err, member) => {
+		if (err) return res.status(500)
+		if (member.length < 1) res.status(400).json({msg: 'No member with such id'})
+		Member.deleteOne({id: req.params.id}).exec((err1) => {
+			if (err1) return res.status(500)			
+			Member.find().exec((err2, members) => {
+				if (err2) return res.status(500)
+				return res.status(201).json(members)
+			})
+		})
+	})
 })
 
 const PORT = 5000;
