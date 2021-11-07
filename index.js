@@ -8,12 +8,6 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 const Member = mongoose.model('Member', MemberSchema)
 
-let MEMBERS = [
-	{id: '1', name: 'Joe', email: 'joe@gmail.com'},
-	{id: '2', name: 'Tim', email: 'tim@sd.com'},
-	{id: '3', name: 'Wjies', email: 'wallet@outlok.com'},
-]
-
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
